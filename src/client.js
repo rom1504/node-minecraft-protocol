@@ -4,38 +4,9 @@ var compression = require('./transforms/compression');
 var framing = require('./transforms/framing');
 var crypto = require('crypto');
 var states = require("./states");
-var ProtoDef = require("protodef").ProtoDef;
-var Serializer = require("protodef").Serializer;
-var Parser = require("protodef").Parser;
 
-var minecraft = require("./datatypes/minecraft");
-
-function createProtocol(types)
-{
-  var proto = new ProtoDef();
-  proto.addTypes(minecraft);
-  proto.addTypes(types);
-  return proto;
-}
-
-function createSerializer({ state = states.HANDSHAKING, isServer = false , version} = {})
-{
-  var mcData=require("minecraft-data")(version);
-  var direction = !isServer ? 'toServer' : 'toClient';
-  var packets = mcData.protocol.states[state][direction];
-  var proto=createProtocol(mcData.protocol.types);
-  return new Serializer(proto,packets);
-}
-
-function createDeserializer({ state = states.HANDSHAKING, isServer = false,
-  packetsToParse = {"packet": true}, version } = {})
-{
-  var mcData=require("minecraft-data")(version);
-  var direction = isServer ? "toServer" : "toClient";
-  var packets = mcData.protocol.states[state][direction];
-  var proto=createProtocol(mcData.protocol.types);
-  return new Parser(proto,packets,packetsToParse);
-}
+var createSerializer=require("./transforms/serializer").createSerializer;
+var createDeserializer=require("./transforms/serializer").createDeserializer;
 
 class Client extends EventEmitter
 {

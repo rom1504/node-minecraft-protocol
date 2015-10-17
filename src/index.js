@@ -2,7 +2,6 @@ var Client = require('./client');
 var Server = require('./server');
 var serializer = require("./transforms/serializer");
 var utils = require("./utils");
-var readPackets = require("./packets").readPackets;
 var createClient = require("./createClient");
 var createServer = require("./createServer");
 
@@ -14,7 +13,6 @@ module.exports = {
   states: require("./states"),
   createSerializer:serializer.createSerializer,
   createDeserializer:serializer.createDeserializer,
-  readPackets:readPackets,
   ping: require('./ping'),
   supportedVersions:require("./version").supportedVersions
 };
