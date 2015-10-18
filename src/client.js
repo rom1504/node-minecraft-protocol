@@ -54,6 +54,7 @@ class Client extends EventEmitter
     this.deserializer.on('error', onError);
 
     this.deserializer.on('data', (parsed) => {
+      parsed.metadata.state=state;
       this.emit('packet', parsed.data, parsed.metadata);
       this.emit(parsed.metadata.name, parsed.data, parsed.metadata);
       this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata);
