@@ -53,7 +53,7 @@
     "ursa-purejs": "0.0.3",
     "uuid": "^2.0.1",
     "yggdrasil": "0.1.0",
-    "protodef":"rom1504/ProtoDef#add_serializer"
+    "protodef":"rom1504/ProtoDef#22b2291c79224746f107132c70cb99ab416c58b1"
   },
   "optionalDependencies": {
     "ursa": "~0.9.1"
