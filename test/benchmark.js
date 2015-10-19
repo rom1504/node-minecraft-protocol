@@ -15,16 +15,21 @@ mc.supportedVersions.forEach(function(supportedVersion){
   var mcData=require("minecraft-data")(supportedVersion);
   var version=mcData.version;
   describe("benchmark "+version.minecraftVersion,function(){
-    this.timeout(20 * 1000);
+    this.timeout(60 * 1000);
     var inputData = [];
     it("bench serializing",function(done){
+      var direction = 'toServer';
+      var packets = mcData.protocol.states[states.PLAY][direction];
       var serializer=new mc.createSerializer({state:states.PLAY,isServer:false,version:version.majorVersion});
       var start, i, j;
       console.log('Beginning write test');
       start = Date.now();
       for(i = 0; i < ITERATIONS; i++) {
         for(j = 0; j < testDataWrite.length; j++) {
-          inputData.push(serializer.createPacketBuffer(testDataWrite[j].name, testDataWrite[j].params));
+          inputData.push(serializer.createPacketBuffer({
+            id:parseInt(packets[testDataWrite[j].name].id),
+            params: testDataWrite[j].params
+          }));
         }
       }
       var result=(Date.now() - start) / 1000;
