@@ -28,8 +28,6 @@ function createProtocol(types,packets)
   return proto;
 }
 
-
-
 function createSerializer({ state = states.HANDSHAKING, isServer = false , version} = {})
 {
   var mcData=require("minecraft-data")(version);
