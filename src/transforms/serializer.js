@@ -12,7 +12,7 @@ function createProtocol(types,packets)
   proto.addTypes(types);
 
   Object.keys(packets).forEach(function(name) {
-    proto.addType(name,["container",packets[name].fields]);
+    proto.addType("packet_"+name,["container",packets[name].fields]);
   });
 
   proto.addType("packet",["container", [
@@ -20,7 +20,7 @@ function createProtocol(types,packets)
     { "name": "params", "type": ["switch", {
       "compareTo": "id",
       "fields": Object.keys(packets).reduce(function(acc,name){
-        acc[parseInt(packets[name].id)]=name;
+        acc[parseInt(packets[name].id)]="packet_"+name;
         return acc;
       },{})
     }]}
