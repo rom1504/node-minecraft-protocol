@@ -54,6 +54,7 @@ class Client extends EventEmitter
     this.deserializer.on('error', onError);
 
     this.deserializer.on('data', (parsed) => {
+      parsed.metadata.id=parsed.data.id;
       parsed.data=parsed.data.params;
       parsed.metadata.name=parsed.metadata.type.params.substr(7); // remove the packet_ prefix
       parsed.metadata.state=state;
