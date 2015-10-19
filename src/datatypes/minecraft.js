@@ -16,6 +16,7 @@ function readUUID(buffer, offset) {
   return {
     value: uuid.unparse(buffer, offset),
     size: 16,
+    type: "uuid"
   };
 }
 
@@ -34,6 +35,7 @@ function readSlot(buffer, offset) {
     return {
       value: value,
       size: 2,
+      type:"slot"
     };
   }
 
@@ -45,14 +47,16 @@ function readSlot(buffer, offset) {
   if(nbtData == 0) {
     return {
       value: value,
-      size: 6
+      size: 6,
+      type:"slot"
     }
   }
   var nbtData = readNbt(buffer, offset + 5);
   value.nbtData = nbtData.value;
   return {
     value: value,
-    size: nbtData.size + 5
+    size: nbtData.size + 5,
+    type:"slot"
   };
 }
 
@@ -87,7 +91,9 @@ function sizeOfSlot(value) {
 
 function readNbt(buffer, offset) {
   buffer = buffer.slice(offset);
-  return nbt.parseUncompressed(buffer);
+  var r=nbt.parseUncompressed(buffer);
+  r.type="nbt";
+  return r;
 }
 
 function writeNbt(value, buffer, offset) {
@@ -104,7 +110,8 @@ function sizeOfNbt(value) {
 function readRestBuffer(buffer, offset) {
   return {
     value: buffer.slice(offset),
-    size: buffer.length - offset
+    size: buffer.length - offset,
+    type:"restBuffer"
   };
 }
 
@@ -127,6 +134,7 @@ function readEntityMetadata(buffer, offset, typeArgs, context) {
       return {
         value: metadata,
         size: cursor + 1 - offset,
+        type:"uint8"
       };
     }
     var results = this.read(buffer, cursor, typeArgs.type, {});
