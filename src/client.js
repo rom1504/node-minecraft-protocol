@@ -49,9 +49,42 @@ class Client extends EventEmitter
     this.serializer = createSerializer({ isServer:this.isServer, version:this.version, state: state});
     this.deserializer = createDeserializer({ isServer:this.isServer, version:this.version, state: state, packetsToParse:
       this.packetsToParse});
-    var onError = (err) => this.emit('error', err);
-    this.serializer.on('error', onError);
-    this.deserializer.on('error', onError);
+    var mcData=require("minecraft-data")(this.version);
+
+    function packetsIdT(packets) {
+      return Object.keys(packets).reduce(function(acc,name){
+        acc[parseInt(packets[name].id)]=name;
+        return acc;
+      },{});
+    }
+    var serializerDirection = !this.isServer ? 'toServer' : 'toClient';
+    var packetsSerialization = mcData.protocol.states[state][serializerDirection];
+    var packetsSerializationId = packetsIdT(packetsSerialization);
+
+
+    this.serializer.on('error', (e) => {
+      var parts=e.field.split(".");
+      parts.shift();
+      parts[0]=packetsSerializationId[parts[0]];
+      e.field = [this.protocolState, serializerDirection].concat(parts).join(".");
+      e.message = `Serialization error for ${e.field} : ${e.message}`;
+      this.emit('error',e);
+    });
+
+
+    var deserializerDirection = this.isServer ? 'toServer' : 'toClient';
+    var packetsDeserialization = mcData.protocol.states[state][deserializerDirection];
+    var packetsDeserializationId = packetsIdT(packetsDeserialization);
+
+
+    this.deserializer.on('error', (e) => {
+      var parts=e.field.split(".");
+      parts.shift();
+      parts[0]=packetsDeserializationId[parts[0]];
+      e.field = [this.protocolState, deserializerDirection].concat(parts).join(".");
+      e.message = `Deserialization error for ${e.field} : ${e.message}`;
+      this.emit('error',e);
+    });
 
     this.deserializer.on('data', (parsed) => {
       parsed.metadata.id=parsed.data.id;
