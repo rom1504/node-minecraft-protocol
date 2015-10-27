@@ -1,7 +1,4 @@
-var ProtoDef = require("protodef").ProtoDef;
-var proto = new ProtoDef();
-
-var [readVarInt, writeVarInt, sizeOfVarInt] = proto.types.varint;
+var [readVarInt, writeVarInt, sizeOfVarInt] = require("protodef").types.varint;
 var zlib = require("zlib");
 var Transform = require("readable-stream").Transform;
 
