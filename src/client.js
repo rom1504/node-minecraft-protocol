@@ -27,7 +27,7 @@ class Client extends EventEmitter
     super();
     this.version=version;
     this.isServer = !!isServer;
-    this.setSerializer(states.HANDSHAKING);
+    //this.setSerializer(states.HANDSHAKING);
 
     this.on('newListener', function(event, listener) {
       var direction = this.isServer ? 'toServer' : 'toClient';
@@ -156,8 +156,12 @@ class Client extends EventEmitter
     this.framer.on('error', onError);
     this.splitter.on('error', onError);
 
-    this.socket.pipe(this.splitter).pipe(this.deserializer);
-    this.serializer.pipe(this.framer).pipe(this.socket);
+    this.socket.pipe(this.splitter)
+    this.framer.pipe(this.socket);
+
+    this.splitter.on('data', (buffer) => {
+      this.emit('raw', buffer);
+    });
   }
 
   end(reason) {
