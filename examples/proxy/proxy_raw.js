@@ -29,11 +29,20 @@ server.on('connection', function(client) {
   var targetClient = new mc.Client(false,"1.8");
   targetClient.connect(25565, 'localhost');
   client.on('raw', function(buffer, state) { // raw event forwarding raw data to the minecraft server
-    console.log(buffer);
     targetClient.writeRaw(buffer);
   });
   targetClient.on('raw', function(buffer, state) { // raw event forwarding raw data to client from minecraft server
     if (!endedClient) {
+      var a = require("protodef").types.varint;
+      var readVarInt=a[0];
+      var val=readVarInt(buffer,0);
+      if(val.value == 0)
+      {
+        var withoutZero=buffer.slice(val.size);
+        console.log(readVarInt(withoutZero,0).value.toString(16));
+        console.log(withoutZero);
+      }
+      else console.log("compressed :",buffer);
       client.writeRaw(buffer);
     }
   });
