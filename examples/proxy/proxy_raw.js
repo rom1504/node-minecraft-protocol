@@ -29,6 +29,7 @@ server.on('connection', function(client) {
   var targetClient = new mc.Client(false,"1.8");
   targetClient.connect(25565, 'localhost');
   client.on('raw', function(buffer, state) { // raw event forwarding raw data to the minecraft server
+    console.log(buffer);
     targetClient.writeRaw(buffer);
   });
   targetClient.on('raw', function(buffer, state) { // raw event forwarding raw data to client from minecraft server
