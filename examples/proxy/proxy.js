@@ -130,6 +130,11 @@ srv.on('login', function(client) {
   });
   var bufferEqual = require('buffer-equal');
   targetClient.on('raw', function(buffer, meta) {
+    var a = require("protodef").types.varint;
+    var readVarInt=a[0];
+    var val=readVarInt(buffer,0);
+    console.log(val.value.toString(16));
+    console.log(buffer);
     if(client.state != states.PLAY || meta.state != states.PLAY)
       return;
     var packetData = targetClient.deserializer.parsePacketBuffer(buffer).data.params;
