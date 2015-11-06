@@ -18,18 +18,13 @@ mc.supportedVersions.forEach(function(supportedVersion){
     this.timeout(60 * 1000);
     var inputData = [];
     it("bench serializing",function(done){
-      var direction = 'toServer';
-      var packets = mcData.protocol.states[states.PLAY][direction];
       var serializer=new mc.createSerializer({state:states.PLAY,isServer:false,version:version.majorVersion});
       var start, i, j;
       console.log('Beginning write test');
       start = Date.now();
       for(i = 0; i < ITERATIONS; i++) {
         for(j = 0; j < testDataWrite.length; j++) {
-          inputData.push(serializer.createPacketBuffer({
-            id:parseInt(packets[testDataWrite[j].name].id),
-            params: testDataWrite[j].params
-          }));
+          inputData.push(serializer.createPacketBuffer(testDataWrite[j]));
         }
       }
       var result=(Date.now() - start) / 1000;
@@ -42,7 +37,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
       console.log('Beginning read test');
       start = Date.now();
       for (j = 0; j < inputData.length; j++) {
-        deserializer.parsePacketData(inputData[j]);
+        deserializer.parsePacketBuffer(inputData[j]);
       }
       console.log('Finished read test in ' + (Date.now() - start) / 1000 + ' seconds');
       done();

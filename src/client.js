@@ -49,47 +49,30 @@ class Client extends EventEmitter
     this.serializer = createSerializer({ isServer:this.isServer, version:this.version, state: state});
     this.deserializer = createDeserializer({ isServer:this.isServer, version:this.version, state: state, packetsToParse:
       this.packetsToParse});
-    var mcData=require("minecraft-data")(this.version);
-
-    function packetsIdT(packets) {
-      return Object.keys(packets).reduce(function(acc,name){
-        acc[parseInt(packets[name].id)]=name;
-        return acc;
-      },{});
-    }
-    var serializerDirection = !this.isServer ? 'toServer' : 'toClient';
-    var packetsSerialization = mcData.protocol.states[state][serializerDirection];
-    var packetsSerializationId = packetsIdT(packetsSerialization);
 
 
     this.serializer.on('error', (e) => {
       var parts=e.field.split(".");
       parts.shift();
-      parts[0]=packetsSerializationId[parts[0]];
+      var serializerDirection = !this.isServer ? 'toServer' : 'toClient';
       e.field = [this.protocolState, serializerDirection].concat(parts).join(".");
       e.message = `Serialization error for ${e.field} : ${e.message}`;
       this.emit('error',e);
     });
 
 
-    var deserializerDirection = this.isServer ? 'toServer' : 'toClient';
-    var packetsDeserialization = mcData.protocol.states[state][deserializerDirection];
-    var packetsDeserializationId = packetsIdT(packetsDeserialization);
-
-
     this.deserializer.on('error', (e) => {
       var parts=e.field.split(".");
       parts.shift();
-      parts[0]=packetsDeserializationId[parts[0]];
+      var deserializerDirection = this.isServer ? 'toServer' : 'toClient';
       e.field = [this.protocolState, deserializerDirection].concat(parts).join(".");
       e.message = `Deserialization error for ${e.field} : ${e.message}`;
       this.emit('error',e);
     });
 
     this.deserializer.on('data', (parsed) => {
-      parsed.metadata.id=parsed.data.id;
+      parsed.metadata.name=parsed.data.name;
       parsed.data=parsed.data.params;
-      parsed.metadata.name=packetsDeserializationId[parsed.metadata.id];
       parsed.metadata.state=state;
       this.emit('packet', parsed.data, parsed.metadata);
       this.emit(parsed.metadata.name, parsed.data, parsed.metadata);
@@ -211,10 +194,10 @@ class Client extends EventEmitter
     }
   }
 
-  write(packetName, params) {
-    debug("writing packet " + this.state + "." + packetName);
+  write(name, params) {
+    debug("writing packet " + this.state + "." + name);
     debug(params);
-    this.serializer.write({ packetName, params });
+    this.serializer.write({ name, params });
   }
 
   writeRaw(buffer) {

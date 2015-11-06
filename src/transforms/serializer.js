@@ -8,6 +8,9 @@ var states = require("../states");
 function createProtocol(types,packets)
 {
   var proto = new ProtoDef();
+  proto.addType("string",["pstring",{
+    countType:"varint"
+  }]);
   proto.addTypes(minecraft);
   proto.addTypes(types);
 
@@ -16,11 +19,16 @@ function createProtocol(types,packets)
   });
 
   proto.addType("packet",["container", [
-    { "name": "id", "type": "varint" },
+    { "name": "name", "type":["mapper",{"type": "varint" ,
+      "mappings":Object.keys(packets).reduce(function(acc,name){
+        acc[parseInt(packets[name].id)]=name;
+        return acc;
+      },{})
+    }]},
     { "name": "params", "type": ["switch", {
-      "compareTo": "id",
+      "compareTo": "name",
       "fields": Object.keys(packets).reduce(function(acc,name){
-        acc[parseInt(packets[name].id)]="packet_"+name;
+        acc[name]="packet_"+name;
         return acc;
       },{})
     }]}
@@ -34,14 +42,7 @@ function createSerializer({ state = states.HANDSHAKING, isServer = false , versi
   var direction = !isServer ? 'toServer' : 'toClient';
   var packets = mcData.protocol.states[state][direction];
   var proto=createProtocol(mcData.protocol.types,packets);
-  var serializer=new Serializer(proto,"packet");
-  var originalWrite=serializer.write.bind(serializer);
-  serializer.write=({packetName,params}={}) =>
-     originalWrite({
-      id:parseInt(packets[packetName].id),
-      params:params
-    });
-  return serializer;
+  return new Serializer(proto,"packet");
 }
 
 function createDeserializer({ state = states.HANDSHAKING, isServer = false,
