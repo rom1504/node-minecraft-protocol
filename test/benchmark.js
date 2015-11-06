@@ -1,4 +1,4 @@
-var ITERATIONS = 100000;
+var ITERATIONS = 10000;
 
 var mc = require("../");
 var util = require('util');
