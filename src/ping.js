@@ -28,8 +28,10 @@ function ping(options, cb) {
   });
 
   client.on('state', function(newState) {
-    if(newState === states.STATUS)
-      client.write('ping_start', {});
+    setTimeout(function() {
+      if(newState === states.STATUS)
+        client.write('ping_start', {});
+    },50)
   });
 
   client.on('connect', function() {

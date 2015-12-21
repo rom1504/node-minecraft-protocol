@@ -6,6 +6,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
   var version=mcData.version;
 
   describe("mc-server "+version.minecraftVersion, function() {
+    this.timeout( 60 * 1000);
     it("starts listening and shuts down cleanly", function(done) {
       var server = mc.createServer({
         'online-mode': false,
@@ -54,7 +55,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
     it("kicks clients that do not send keepalive packets", function(done) {
       var server = mc.createServer({
         'online-mode': false,
-        kickTimeout: 100,
+        kickTimeout: 500,
         checkTimeoutInterval: 10,
         version: version.majorVersion
       });

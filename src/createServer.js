@@ -219,19 +219,25 @@ function createServer(options) {
       }
       client.write('compress', { threshold: 256 }); // Default threshold is 256
       client.compressionThreshold = 256;
-      client.write('success', {uuid: client.uuid, username: client.username});
-      client.state = states.PLAY;
-      loggedIn = true;
-      if(enableKeepAlive) startKeepAlive();
+      setTimeout(function(){
+        client.write('success', {uuid: client.uuid, username: client.username});
+        client.state = states.PLAY;
+        setTimeout(function(){
+          loggedIn = true;
+          if(enableKeepAlive) startKeepAlive();
 
-      clearTimeout(loginKickTimer);
-      loginKickTimer = null;
+          clearTimeout(loginKickTimer);
+          loginKickTimer = null;
 
-      server.playerCount += 1;
-      client.once('end', function() {
-        server.playerCount -= 1;
-      });
-      server.emit('login', client);
+          server.playerCount += 1;
+          client.once('end', function() {
+            server.playerCount -= 1;
+          });
+          server.emit('login', client);
+        },20)
+      },20)
+
+
     }
   });
   server.listen(port, host);

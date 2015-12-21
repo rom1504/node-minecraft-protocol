@@ -97,9 +97,12 @@ function createClient(options) {
       nextState: 2
     });
     client.state = states.LOGIN;
-    client.write('login_start', {
-      username: client.username
-    });
+    setTimeout(function(){
+      client.write('login_start', {
+        username: client.username
+      });
+    },20); // TODO : fix this properly : more things being async now means changing the parser needs to be done properly (can't miss packets)
+
   }
 
   function onCompressionRequest(packet) {
