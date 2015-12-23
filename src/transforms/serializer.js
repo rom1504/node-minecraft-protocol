@@ -36,26 +36,36 @@ function createProtocol(types,packets)
   return proto;
 }
 
-function createSerializer({ state = states.HANDSHAKING, isServer = false , version} = {})
+function createSerializerProtocol({ state = states.HANDSHAKING, isServer = false , version} = {})
 {
   var mcData=require("minecraft-data")(version);
   var direction = !isServer ? 'toServer' : 'toClient';
   var packets = mcData.protocol.states[state][direction];
-  var proto=createProtocol(mcData.protocol.types,packets);
-  return new Serializer(proto,"packet");
+  return createProtocol(mcData.protocol.types,packets);
 }
 
-function createDeserializer({ state = states.HANDSHAKING, isServer = false,
+function createDeserializerProtocol({ state = states.HANDSHAKING, isServer = false,
   packetsToParse = {"packet": true}, version } = {})
 {
   var mcData=require("minecraft-data")(version);
   var direction = isServer ? "toServer" : "toClient";
   var packets = mcData.protocol.states[state][direction];
-  var proto=createProtocol(mcData.protocol.types,packets);
-  return new Parser(proto,"packet");
+  return createProtocol(mcData.protocol.types,packets);
+}
+
+function createSerializer(options)
+{
+  return new Serializer(createSerializerProtocol(options),"packet");
+}
+
+function createDeserializer(options)
+{
+  return new Parser(createDeserializerProtocol(options),"packet");
 }
 
 module.exports = {
   createSerializer:createSerializer,
-  createDeserializer:createDeserializer
+  createDeserializer:createDeserializer,
+  createSerializerProtocol:createSerializerProtocol,
+  createDeserializerProtocol:createDeserializerProtocol
 };

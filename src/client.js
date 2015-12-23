@@ -7,6 +7,8 @@ var states = require("./states");
 
 var createSerializer=require("./transforms/serializer").createSerializer;
 var createDeserializer=require("./transforms/serializer").createDeserializer;
+var createSerializerProtocol=require("./transforms/serializer").createSerializerProtocol;
+var createDeserializerProtocol=require("./transforms/serializer").createDeserializerProtocol;
 
 class Client extends EventEmitter
 {
@@ -87,6 +89,11 @@ class Client extends EventEmitter
     var oldProperty = this.protocolState;
     this.protocolState = newProperty;
 
+    console.log('going to ',this.protocolState);
+    this.serializer.proto = createSerializerProtocol({ isServer:this.isServer, version:this.version, state: this.protocolState});
+    this.deserializer.proto = createDeserializerProtocol({ isServer:this.isServer, version:this.version, state: this.protocolState, packetsToParse:
+    this.packetsToParse});
+/*
     if(!this.compressor)
     {
       this.serializer.unpipe(this.framer);
@@ -111,7 +118,7 @@ class Client extends EventEmitter
     {
       this.serializer.pipe(this.compressor);
       this.decompressor.pipe(this.deserializer);
-    }
+    }*/
 
     this.emit('state', newProperty, oldProperty);
   }

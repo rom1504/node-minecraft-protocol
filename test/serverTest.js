@@ -30,13 +30,17 @@ mc.supportedVersions.forEach(function(supportedVersion){
           client.write('login_start',{username:'superpants'}); // and send some packet of the new state
           // putting that line ^ in a setTimeout "fixes" this test, but the other servers aren't that nice, so this needs to be handled
 
-          serverClient.on('set_protocol',function(){  // but the server-side client only knows about it at that point
+          serverClient.once('set_protocol',function(){  // but the server-side client only knows about it at that point
             // which might be one tick too late with an async parser
             serverClient.state='login';
           });
 
-          serverClient.on('login_start',function(){
-            done();
+          serverClient.once('login_start',function(){
+            client.once('end', function() {
+              server.on('close', done);
+              server.close();
+            });
+            client.end();
           });
 
 
@@ -45,6 +49,42 @@ mc.supportedVersions.forEach(function(supportedVersion){
         client.setSocket(net.connect(25565, 'localhost'));
       });
       server.listen(25565, 'localhost');
+    });
+
+
+    it("doesn't error out in 500ms", function(done) {
+      var server = mc.createServer({
+        'online-mode': false,
+        version: version.majorVersion
+      });
+      var count = 2;
+      server.once('error',done);
+      server.on('connection', function(client) {
+        client.on('end', function(reason) {
+          server.close();
+        });
+        setTimeout(function(){client.end();},500);
+      });
+      server.on('close', function() {
+        resolve();
+      });
+      server.on('listening', function() {
+        var client = mc.createClient({
+          username: 'superpants',
+          host: '127.0.0.1',
+          port: 25565,
+          keepAlive: false,
+          version: version.majorVersion
+        });
+        client.once('error',done);
+        client.on('end', function() {
+          resolve();
+        });
+      });
+      function resolve() {
+        count -= 1;
+        if(count <= 0) done();
+      }
     });
 
     it("starts listening and shuts down cleanly", function(done) {

@@ -27,11 +27,6 @@ function ping(options, cb) {
     client.write('ping', {time: [0, 0]});
   });
 
-  client.on('state', function(newState) {
-    if(newState === states.STATUS)
-      client.write('ping_start', {});
-  });
-
   client.on('connect', function() {
     client.write('set_protocol', {
       protocolVersion: version.version,
@@ -40,6 +35,7 @@ function ping(options, cb) {
       nextState: 1
     });
     client.state = states.STATUS;
+    client.write('ping_start', {});
   });
 
   client.connect(port, host);
